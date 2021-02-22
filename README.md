@@ -1,1 +1,1 @@
-"# science-of-crowds" 
+# science-of-crowds
