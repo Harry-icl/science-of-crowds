@@ -1,2 +1,2 @@
-class Simulation:
+class Simulator:
     
