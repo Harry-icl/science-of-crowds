@@ -2,6 +2,7 @@
 
 import networkx as nx
 import csv
+from math import ceil
 
 class NetworkModel(nx.DiGraph):
     """Abstract class to provide some more intuitive functions for modelling a building as a network."""
@@ -18,7 +19,7 @@ class NetworkModel(nx.DiGraph):
         limiting_flow_rate(float): The limiting flow rate in min^-1m^-1.
         free_speed(float): The free speed of the walkway.
         """
-        self.add_edge(start, end, length=length, flow_rate=limiting_flow, free_speed=free_speed)
+        self.add_edge(start, end, length=length, flow_rate=limiting_flow, free_speed=free_speed, populations=[0] * (int(length / free_speed) + 1))
 
     def add_doorway(self, name, width=1, limiting_flow_rate=42):
         """
@@ -34,8 +35,9 @@ class NetworkModel(nx.DiGraph):
         """
         if name in self.nodes():
             self.nodes[name]["flow_rate"] = limiting_flow_rate*width
+            self.nodes[name]["population"] = 0
         else:
-            self.add_node(name, flow_rate=limiting_flow_rate*width)
+            self.add_node(name, flow_rate=limiting_flow_rate*width, population=0)
 
     def add_open_space(self, name):
         """
@@ -46,7 +48,7 @@ class NetworkModel(nx.DiGraph):
         name(str): The number of the node.
         """
         if name not in self.nodes():
-            self.add_node(name)
+            self.add_node(name, flow_rate=None, population=0)
 
     def add_graph_from_csv(self, filepath, limiting_flow_walkway=100, limiting_flow_rate_doorway=42, free_speed_walkway=1.25):
         """
@@ -64,10 +66,10 @@ class NetworkModel(nx.DiGraph):
             for row in reader:
                 if row[0] == "w":
                     _, start, end, length = row
-                    self.add_walkway(start, end, length, limiting_flow=limiting_flow_walkway, free_speed=free_speed_walkway)
+                    self.add_walkway(start, end, float(length), limiting_flow=limiting_flow_walkway, free_speed=free_speed_walkway)
                 elif row[0] == "d":
                     _, location, width = row
-                    self.add_doorway(location, width, limiting_flow_rate=limiting_flow_rate_doorway)
+                    self.add_doorway(location, float(width), limiting_flow_rate=limiting_flow_rate_doorway)
                 elif row[0] == "o":
                     _, location, _ = row
                     self.add_open_space(location)
