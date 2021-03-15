@@ -2,6 +2,7 @@
 
 import networkx as nx
 import csv
+import numpy as np
 from math import ceil
 
 class NetworkModel(nx.DiGraph):
@@ -47,8 +48,11 @@ class NetworkModel(nx.DiGraph):
         ----------
         name(str): The number of the node.
         """
-        if name not in self.nodes():
-            self.add_node(name, flow_rate=None, population=0)
+        if name in self.nodes():
+            self.nodes[name]["flow_rate"] = np.inf
+            self.nodes[name]["population"] = 0
+        else:
+            self.add_node(name, flow_rate=np.inf, population=0)
 
     def add_graph_from_csv(self, filepath, limiting_flow_walkway=100, limiting_flow_rate_doorway=42, free_speed_walkway=1.25):
         """
