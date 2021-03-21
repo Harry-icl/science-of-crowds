@@ -1,0 +1,11 @@
+README.md
+setup.py
+network_simulation/__init__.py
+network_simulation/network.py
+network_simulation/simulation.py
+network_simulation/test.py
+science_of_crowds.egg-info/PKG-INFO
+science_of_crowds.egg-info/SOURCES.txt
+science_of_crowds.egg-info/dependency_links.txt
+science_of_crowds.egg-info/requires.txt
+science_of_crowds.egg-info/top_level.txt
