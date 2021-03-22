@@ -8,7 +8,7 @@ from math import ceil
 class NetworkModel(nx.DiGraph):
     """Abstract class to provide some more intuitive functions for modelling a building as a network."""
 
-    def add_walkway(self, start, end, length, limiting_flow=100, free_speed=1.25):
+    def add_walkway(self, start, end, length, limiting_flow=3.3, free_speed=1.25):
         """
         Add a walkway to the network model.
 
@@ -22,7 +22,7 @@ class NetworkModel(nx.DiGraph):
         """
         self.add_edge(start, end, length=length, flow_rate=limiting_flow, free_speed=free_speed, populations=[0] * (int(length / free_speed) + 1))
 
-    def add_doorway(self, name, width=1, limiting_flow_rate=42):
+    def add_doorway(self, name, width=1, limiting_flow_rate=0.7):
         """
         Add a doorway to the network model.
 
@@ -54,7 +54,7 @@ class NetworkModel(nx.DiGraph):
         else:
             self.add_node(name, flow_rate=np.inf, population=0)
 
-    def add_graph_from_csv(self, filepath, limiting_flow_walkway=100, limiting_flow_rate_doorway=42, free_speed_walkway=1.25):
+    def add_graph_from_csv(self, filepath, limiting_flow_walkway=3.3, limiting_flow_rate_doorway=0.7, free_speed_walkway=1.25):
         """
         Add edges from a csv that is formatted as:
             start, end, type, width

@@ -12,7 +12,7 @@ from .network import NetworkModel
 cmap = mcolors.LinearSegmentedColormap('CustomMap', {'red': ((0, 0, 0), (1, 1, 1)), 'green': ((0, 0, 0), (1, 0, 0)), 'blue': ((0, 0, 0), (1, 0, 0))})
 
 class Simulation:
-    def __init__(self, filepaths, limiting_flow_walkway=100, limiting_flow_rate_doorway=42, free_speed_walkway=1.25):
+    def __init__(self, filepaths, limiting_flow_walkway=3.3, limiting_flow_rate_doorway=0.7, free_speed_walkway=1.25):
         self.network_model = NetworkModel()
         self.T = 0
         self.evacuated = 0
@@ -42,7 +42,6 @@ class Simulation:
                     self.network_model.edges[edge]["populations"][0] += to_dist
                     self.network_model.nodes[next_node]["population"] -= to_dist
             
-            #REFACTOR ALL THIS TO USE MIN INSTEAD OF MULTIPLE LINES
             else:
                 moving = min(self.network_model.nodes[next_node]["population"], self.network_model.nodes[next_node]["flow_rate"])
                 self.evacuated += moving
@@ -70,8 +69,8 @@ class Simulation:
         colors_nodes = [graph.nodes[n]['population']/self._get_total_population() if n != "8" else (graph.nodes[n]["population"] + self.evacuated_results[num])/self._get_total_population() for n in nodes]
         colors_edges = [sum(graph.edges[e]["populations"])/self._get_total_population() for e in edges]
         pos = nx.spring_layout(graph, fixed=fixed_pos.keys(), pos=fixed_pos)
-        ec = nx.draw_networkx_edges(graph, pos, edgelist=edges, edge_color=colors_edges, width=3, edge_cmap=cmap)
-        nc = nx.draw_networkx_nodes(graph, pos, nodelist=nodes, node_color=colors_nodes, node_size=100, cmap=cmap)
+        ec = nx.draw_networkx_edges(graph, pos, edgelist=edges, edge_color=colors_edges, width=3, edge_cmap=plt.cm.jet, edge_vmin=0, edge_vmax=1)
+        nc = nx.draw_networkx_nodes(graph, pos, nodelist=nodes, node_color=colors_nodes, node_size=100, cmap=plt.cm.jet, vmin=0, vmax=1)
     
     def _get_total_population(self):
         population = self.evacuated + sum([self.network_model.nodes[node]["population"] for node in self.network_model.nodes()]) + sum([sum([self.network_model.edges[edge]["populations"][i] for i in range(len(self.network_model.edges[edge]["populations"]))]) for edge in self.network_model.edges()])
@@ -85,7 +84,7 @@ class Simulation:
         print("Animation DONE")
         if filepath:
             Writer = matplotlib.animation.writers['ffmpeg']
-            writer = Writer(fps=2, metadata=dict(artist="Harrison Mouat"), bitrate=1800)
+            writer = Writer(fps=10, metadata=dict(artist="Harrison Mouat"), bitrate=1800)
             ani.save(filepath, writer=writer)
             print("SAVED")
         if show:
@@ -95,13 +94,11 @@ class Simulation:
         self.start = self.network_model
         self.simulation_results = [deepcopy(self.network_model)]
         self.evacuated_results = [self.evacuated]
-        pops = nx.get_node_attributes(self.network_model, "population")
-        pops_clean = {}
-        for x in pops.keys():
-            if pops[x] > 0:
-                pops_clean[x] = pops[x]
         while self.evacuated < self._get_total_population():
             self._increment_time()
             self.simulation_results.append(deepcopy(self.network_model))
             self.evacuated_results.append(self.evacuated)
         self.network_model = self.start
+        print(f"Time to evacuate: {self.T}")
+        print(f"Total population: {self._get_total_population()}")
+        self.T = 0
